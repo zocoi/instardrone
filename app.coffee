@@ -118,7 +118,7 @@ faceDetection = =>
   # return unless lastPng
   # console.log "Processing Image..."
   processingImage = true
-  cv.readImage "jyri.png", (err, im)=>
+  cv.readImage lastPng, (err, im)=>
     noseCascade.detectMultiScale im, (err, matrices)=>
       return if err
       if matrices.length == 0 
