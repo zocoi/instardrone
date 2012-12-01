@@ -1,0 +1,24 @@
+body {
+  margin:0;
+  padding:0;
+  background: #ddd;
+}
+
+p {
+  margin:0; padding:0; height:240px;
+}
+
+#tweets {
+  width:1032px;
+  margin: auto;
+  padding-top:10px;
+}
+
+.tweet {
+  display:block; width:322px; height:202px; float:left; margin:0 10px; border:1px solid #CCC
+}
+
+.tweet .content {
+  width:320px; height:200px; background-color: #EEE; margin:1px
+}
+}

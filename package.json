@@ -10,6 +10,8 @@
 	  "ar-drone": "*",
     "opencv": "*",
     "ffmpeg": "*",
-    "easyimage": "*"
+    "express": "3.0.3",
+    "jade": "*",
+    "socket.io": "*"
   }
 }
