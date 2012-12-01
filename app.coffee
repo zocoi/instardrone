@@ -30,6 +30,7 @@ faceDetection = ->
       for face in faces
         im.ellipse(face.x + face.width/2, face.y + face.height/2, face.width/2, face.height/2);
       buff = im.toBuffer()
+      console.log "Buffered image", buff
       # Finish
       processingImage = false
 
