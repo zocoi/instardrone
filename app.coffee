@@ -11,6 +11,9 @@ client = arDrone.createClient()
 #   @stop()
 #   @land()
 
+# client.land()
+# return
+
 
 # Camera stream
 pngStream = arDrone.createPngStream()
@@ -26,12 +29,38 @@ pngStream
     # console.log("got image")
     lastPng = pngBuffer
 
+camera_started = false
+client.on 'navdata', (data) =>
+  # console.log data
 
+  if data.droneState.cameraReady
+    faceDetection()
 
-setInterval ->
-  faceDetection()
-, 500
-  
+    unless camera_started
+      startFlight()
+
+      camera_started = true
+
+  if data.droneState.lowBattery
+    console.log "Low battery"
+    client.stop()
+    client.land()
+
+startFlight = =>
+  client.takeoff()
+
+  client.after 2000, ->
+    @stop()
+    @up(1.0)
+    @clockwise(0.5)
+
+  client.after 4000, ->
+    @stop()
+
+  client.after 10000, ->
+    @stop()
+    @land()
+
 faceDetection = ->
   return unless lastPng
   console.log "Processing Image..."
