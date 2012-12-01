@@ -1,0 +1,13 @@
+{
+  "name": "Drone",
+  "version": "0.0.2",
+  "private": true,
+  "scripts": {
+    "start": "node index"
+  },
+  "dependencies": {
+    "coffee-script": "1.3.3",
+	  "ar-drone": "*",
+    "opencv": "*"
+  }
+}
