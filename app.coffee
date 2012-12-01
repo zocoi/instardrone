@@ -1,8 +1,6 @@
 arDrone = require("ar-drone")
 cv = require("opencv")
 http = require("http")
-<<<<<<< HEAD
-=======
 TwitPic = require("twitpic").TwitPic
 
 console.log("Init")
@@ -21,8 +19,6 @@ tp.config (config) ->
 console.log("Twitpic Initalized")
 
 console.log("Beginning drone init")
-
->>>>>>> twitpic integration
 client = arDrone.createClient()
 
 
@@ -110,7 +106,7 @@ startFlight = =>
   client.takeoff()
   client.after(10000, ->
     client.up 1.0
-  ).after(5000, ->
+  ).after(3000, ->
     client.stop()
   ).after(5000, ->
     flight_loop_start = true
