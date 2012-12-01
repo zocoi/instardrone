@@ -2,6 +2,8 @@ arDrone = require("ar-drone")
 cv = require("opencv")
 http = require("http")
 TwitPic = require("twitpic").TwitPic
+util = require('util')
+easyimg = require('easyimage')
 
 console.log("Init")
 
@@ -28,6 +30,7 @@ lastPng = null
 lastFacePng = null
 faceCascade = new cv.CascadeClassifier('node_modules/opencv/data/haarcascade_frontalface_alt2.xml')
 noseCascade = new cv.CascadeClassifier('node_modules/opencv/data/haarcascade_mcs_nose.xml')
+eyeCascade = new cv.CascadeClassifier('node_modules/opencv/data/haarcascade_mcs_eyepair_big.xml')
 processingImage = false
 current_x = 0;
 current_y = 0;
@@ -44,11 +47,11 @@ reset_values = =>
 
 flight_loop_start = false
 
-pngStream
-  .on('error', console.log)
-  .on 'data', (pngBuffer) ->
-    # console.log("got image")
-    lastPng = pngBuffer
+# pngStream
+#   .on('error', console.log)
+#   .on 'data', (pngBuffer) ->
+#     # console.log("got image")
+#     lastPng = pngBuffer
 
 camera_started = false
 client.on 'navdata', (data) =>
@@ -116,11 +119,15 @@ animating = false
 
 faceDetection = =>
   # return unless lastPng
-  # console.log "Processing Image..."
+  console.log "Processing Image..."
   processingImage = true
   cv.readImage lastPng, (err, im)=>
-    noseCascade.detectMultiScale im, (err, matrices)=>
-      return if err
+    # im.detectObject 'node_modules/opencv/data/haarcascade_eye.xml', {}, (err, matrices)=>
+    faceCascade.detectMultiScale im, (err, matrices)=>
+      console.log matrices
+      if err
+        console.log err
+        return
       if matrices.length == 0 
         reset_values()
         return
@@ -131,20 +138,15 @@ faceDetection = =>
         matrix = matrices.reduce (a,b) -> if a.width >= b.width then a else b
         
       console.log "face matrix: ", matrix
-      # Draw a circle on his freaking face
-      im.ellipse(matrix.x + matrix.width/2, matrix.y + matrix.height/2, matrix.width/2, matrix.height/2)
+      
       current_width = matrix.width
       current_x = matrix.x
       current_y = matrix.y
-
-      # Draw a moustache below his nose
-      cv.readImage "moustache.png", (err, moustache)->
-        imMatrix = new cv.Matrix(im.width(), im.height())
-        imMatrix.addWeighted(im, 0.7, moustache, 0.9)
-        imMatrix.toBuffer()
-
-      
-      lastFacePng = im.toBuffer()
+      # Draw a circle on his freaking face
+      im.ellipse(matrix.x + matrix.width/2, matrix.y + matrix.height/2, matrix.width/2, matrix.height/2)
+      # Draw a glasses on his 2 eyes
+      # TBD
+      lastFacePngBuffer = im.toBuffer()
 
       # if (!animating)
       #   animating = YES
@@ -153,6 +155,10 @@ faceDetection = =>
       # console.log "Found a face: ", lastFacePng
       # Finish
       lastFaceFile = im.save("./tmp/image.png")
+      # Draw a moustache below his nose
+      easyimg.exec "composite -gravity center #{__dirname}/moustache.png #{__dirname}/tmp/face.png", (err, stdout, stderr)->
+        console.log err if err
+        console.log('Command executed')
       # Upload a photo and post a tweet
       tp.uploadAndPost
         path: "./tmp/image.png"
@@ -162,6 +168,7 @@ faceDetection = =>
 
       processingImage = false
 
+faceDetection()
 client.createRepl()
 
 
