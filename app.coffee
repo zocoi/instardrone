@@ -1,6 +1,28 @@
 arDrone = require("ar-drone")
 cv = require("opencv")
 http = require("http")
+<<<<<<< HEAD
+=======
+TwitPic = require("twitpic").TwitPic
+
+console.log("Init")
+
+# Must create a TwitPic object for write-enabled methods
+tp = new TwitPic()
+
+# Configure the TwitPic object with our credentials
+tp.config (config) ->
+  config.apiKey = "b840fbd0fafe24765feac9c6fe196cf9"
+  config.consumerKey = "iMl9lK90HiYv34hPF6UXQ"
+  config.consumerSecret = "kNVriR7pF6EkPOACgv3WQrCBahVve078CZHES8qQ"
+  config.oauthToken = "983103030-KcOqYPjq7nv3lHzuECy3VvQtGFeSvqaoKK0V5mfq"
+  config.oauthSecret = "cAOm62uiUvKJeF3ozeb4ePMuTaZpO2GPjjIkULWUQR4"
+
+console.log("Twitpic Initalized")
+
+console.log("Beginning drone init")
+
+>>>>>>> twitpic integration
 client = arDrone.createClient()
 
 
@@ -134,6 +156,14 @@ faceDetection = =>
 
       # console.log "Found a face: ", lastFacePng
       # Finish
+      lastFaceFile = im.save("./tmp/image.png")
+      # Upload a photo and post a tweet
+      tp.uploadAndPost
+        path: "./tmp/image.png"
+        message: "Face detected!"
+      , (data) ->
+        console.log data
+
       processingImage = false
 
 client.createRepl()
