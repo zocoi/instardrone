@@ -1,18 +1,7 @@
 arDrone = require("ar-drone")
 cv = require("opencv")
 http = require("http")
-
-
 client = arDrone.createClient()
-# client.takeoff()
-# client.after(5000, ->
-#   @clockwise 0.5
-# ).after 10000, ->
-#   @stop()
-#   @land()
-
-# client.land()
-# return
 
 
 # Camera stream
@@ -46,7 +35,7 @@ pngStream
 camera_started = false
 client.on 'navdata', (data) =>
   # console.log data
-  console.log "x " + current_x + " y " + current_y
+  #console.log "x " + current_x + " y " + current_y
 
   if data.droneState.cameraReady
     faceDetection()
@@ -61,7 +50,6 @@ client.on 'navdata', (data) =>
 
   if data.droneState.lowBattery
     console.log "Low battery"
-    client.stop()
     client.land()
 
 moving_left = false;
@@ -70,42 +58,43 @@ moving_right = false;
 moving_down = false;
 
 flight_loop = =>
-  if current_x < image_center_x
-    if (moving_right)
-      client.stop()
-      moving_right = false
-    if (!moving_left)
-      moving_left = true
-      client.counterClockwise(0.1)
+  return
+  # if current_x < image_center_x
+  #   if (moving_right)
+  #     client.stop()
+  #     moving_right = false
+  #   if (!moving_left)
+  #     console.log "moving left"
+  #     moving_left = true
+  #     client.counterClockwise(0.1)
     
-  if current_x > image_center_x
-    if (moving_left)
-      client.stop()
-      moving_left = false
-    if (!moving_right)
-      moving_right = true
-      client.clockwise(0.1)
+  # if current_x > image_center_x
+  #   if (moving_left)
+  #     client.stop()
+  #     moving_left = false
+  #   if (!moving_right)
+  #     console.log "moving right"
+  #     moving_right = true
+  #     client.clockwise(0.1)
 
-  if (current_width < face_max_width)
-    client.front(0.1)
-  else
-    client.back(0.1)
+  # # if (current_width < face_max_width)
+  # #   console.log "front"
+  # #   client.front(0.1)
+  # # else
+  # #   console.log "back"
+  # #   client.back(0.1)
 
 startFlight = =>
   client.takeoff()
-
-  client.after 2000, ->
-    @stop()
-    @up(1.0)
-    @clockwise(0.2)
-
-  client.after 1000, =>
+  client.after(10000, ->
+    client.up 1.0
+  ).after(5000, ->
+    client.stop()
+  ).after(5000, ->
     flight_loop_start = true
+  )
 
-  client.after 60000, =>
-    @stop()
-    @land()
-    process.exit(0)
+animating = false
 
 faceDetection = =>
   # return unless lastPng
@@ -138,6 +127,11 @@ faceDetection = =>
 
       
       lastFacePng = im.toBuffer()
+
+      # if (!animating)
+      #   animating = YES
+      #   client.animate('flipLeft', 15);
+
       # console.log "Found a face: ", lastFacePng
       # Finish
       processingImage = false
