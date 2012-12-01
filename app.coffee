@@ -156,7 +156,7 @@ faceDetection = =>
       # Finish
       lastFaceFile = im.save("./tmp/image.png")
       # Draw a moustache below his nose
-      easyimg.exec "composite -gravity center #{__dirname}/moustache.png #{__dirname}/tmp/image.png", (err, stdout, stderr)->
+      easyimg.exec "convert #{__dirname}/tmp/image.png -page +#{matrix.x + 20}+#{matrix.y+30} #{__dirname}/moustache.png -flatten #{__dirname}/tmp/image.png", (err, stdout, stderr)->
         console.log err if err
         console.log('Command executed')
       # Upload a photo and post a tweet
@@ -168,7 +168,6 @@ faceDetection = =>
 
       processingImage = false
 
-faceDetection()
 client.createRepl()
 
 
