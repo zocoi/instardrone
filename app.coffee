@@ -1,37 +1,71 @@
 arDrone = require("ar-drone")
 cv = require("opencv")
+http = require("http")
+
 
 client = arDrone.createClient()
-client.takeoff()
-client.after(5000, ->
-  @clockwise 0.5
-).after 1000, ->
-  @stop()
-  @land()
+# client.takeoff()
+# client.after(5000, ->
+#   @clockwise 0.5
+# ).after 10000, ->
+#   @stop()
+#   @land()
 
 
 # Camera stream
 pngStream = arDrone.createPngStream()
 lastPng = null
-face_cascade = new cv.CascadeClassifier('node_modules/opencv/data/haarcascade_frontalface_alt2.xml')
+lastFacePng = null
+faceCascade = new cv.CascadeClassifier('node_modules/opencv/data/haarcascade_frontalface_alt2.xml')
 
 processingImage = false
 
 pngStream
   .on('error', console.log)
   .on 'data', (pngBuffer) ->
-    console.log("got image")
+    # console.log("got image")
     lastPng = pngBuffer
-    
+
+
+
+setInterval ->
+  faceDetection()
+, 500
+  
 faceDetection = ->
+  return unless lastPng
+  console.log "Processing Image..."
   processingImage = true
   cv.readImage lastPng, (err, im)->
-    face_cascade.detectMultiScale im, (err, faces)->
-      for face in faces
-        im.ellipse(face.x + face.width/2, face.y + face.height/2, face.width/2, face.height/2);
-      buff = im.toBuffer()
-      console.log "Buffered image", buff
+    faceCascade.detectMultiScale im, (err, matrices)->
+      return if matrices.length == 0
+      if matrices.length == 1
+        matrix = matrices[0]
+      else
+        # Got many face matrices, only get the biggest one
+        matrix = matrices.reduce (a,b) -> if a.width >= b.width then a else b
+      # Draw a circle on his freaking face
+      im.ellipse(matrix.x + matrix.width/2, matrix.y + matrix.height/2, matrix.width/2, matrix.height/2)
+      
+      lastFacePng = im.toBuffer()
+      console.log "Found a face: ", lastFacePng
       # Finish
       processingImage = false
 
 client.createRepl()
+
+
+# Show the face image
+server = http.createServer (req, res)->
+  if (!lastFacePng)
+    res.writeHead(503)
+    res.end('Did not receive any png data yet.')
+    return
+
+  res.writeHead(200, {'Content-Type': 'image/png'})
+  res.end(lastFacePng)
+
+
+server.listen 8080, ()->
+  console.log('Serving latest png on port 8080 ...')
+
