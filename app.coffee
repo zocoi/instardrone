@@ -20,7 +20,7 @@ pngStream = arDrone.createPngStream()
 lastPng = null
 lastFacePng = null
 faceCascade = new cv.CascadeClassifier('node_modules/opencv/data/haarcascade_frontalface_alt2.xml')
-
+noseCascade = new cv.CascadeClassifier('node_modules/opencv/data/haarcascade_mcs_nose.xml')
 processingImage = false
 current_x = 0;
 current_y = 0;
@@ -91,7 +91,6 @@ flight_loop = =>
   else
     client.back(0.1)
 
-
 startFlight = =>
   client.takeoff()
 
@@ -108,13 +107,12 @@ startFlight = =>
     @land()
     process.exit(0)
 
-
 faceDetection = =>
-  return unless lastPng
+  # return unless lastPng
   # console.log "Processing Image..."
   processingImage = true
-  cv.readImage lastPng, (err, im)=>
-    faceCascade.detectMultiScale im, (err, matrices)=>
+  cv.readImage "jyri.png", (err, im)=>
+    noseCascade.detectMultiScale im, (err, matrices)=>
       return if err
       if matrices.length == 0 
         reset_values()
@@ -122,14 +120,22 @@ faceDetection = =>
       if matrices.length == 1
         matrix = matrices[0]
       else
-        # Got many face matrices, only get the biggest one
+        # Got many matrices, only get the biggest one
         matrix = matrices.reduce (a,b) -> if a.width >= b.width then a else b
+        
+      console.log "face matrix: ", matrix
       # Draw a circle on his freaking face
       im.ellipse(matrix.x + matrix.width/2, matrix.y + matrix.height/2, matrix.width/2, matrix.height/2)
-
       current_width = matrix.width
       current_x = matrix.x
       current_y = matrix.y
+
+      # Draw a moustache below his nose
+      cv.readImage "moustache.png", (err, moustache)->
+        imMatrix = new cv.Matrix(im.width(), im.height())
+        imMatrix.addWeighted(im, 0.7, moustache, 0.9)
+        imMatrix.toBuffer()
+
       
       lastFacePng = im.toBuffer()
       # console.log "Found a face: ", lastFacePng
