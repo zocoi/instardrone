@@ -156,7 +156,7 @@ faceDetection = =>
       # Upload a photo and post a tweet
       tp.uploadAndPost
         path: "./tmp/image.png"
-        message: "Face detected!"
+        message: ""
       , (data) ->
         console.log data
 
