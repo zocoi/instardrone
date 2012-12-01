@@ -25,10 +25,15 @@ processingImage = false
 current_x = 0;
 current_y = 0;
 current_width = 0;
-face_max_width = 3/4 * 554
 
+face_max_width = 3/4 * 554
 image_center_x = 554/2
 image_center_y = 312/2
+
+reset_values = =>
+  face_max_width = 3/4 * 554
+  image_center_x = 554/2
+  image_center_y = 312/2
 
 flight_loop_start = false
 
@@ -108,10 +113,12 @@ faceDetection = =>
   return unless lastPng
   # console.log "Processing Image..."
   processingImage = true
-  cv.readImage lastPng, (err, im)->
-    faceCascade.detectMultiScale im, (err, matrices)->
+  cv.readImage lastPng, (err, im)=>
+    faceCascade.detectMultiScale im, (err, matrices)=>
       return if err
-      return if matrices.length == 0
+      if matrices.length == 0 
+        reset_values()
+        return
       if matrices.length == 1
         matrix = matrices[0]
       else
