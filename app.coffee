@@ -172,7 +172,7 @@ faceDetection()
 client.createRepl()
 
 
-# Show the face image
+###
 server = http.createServer (req, res)->
   if (!lastFacePng)
     res.writeHead(503)
@@ -186,3 +186,4 @@ server = http.createServer (req, res)->
 server.listen 8080, ()->
   console.log('Serving latest png on port 8080 ...')
 
+###
